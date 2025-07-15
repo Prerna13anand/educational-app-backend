@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import videoRoutes from './routes/videoRoutes.js';
+import conceptRoutes from './routes/conceptRoutes.js';
 
 dotenv.config();
 
@@ -23,6 +24,9 @@ app.use(express.json());
 
 // Tell express to use the video routes
 app.use('/api/videos', videoRoutes);
+
+// All concept-related routes will be under /api/concepts
+app.use('/api/concepts', conceptRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is listening on port ${PORT}`);

@@ -1,19 +1,16 @@
+// In routes/videoRoutes.js
 import express from 'express';
-import {
-  getAllVideos,
-  getVideoById,
-  getConceptsByVideoId,
-} from '../controllers/videoController.js';
+import { getAllVideos, getVideoById, seedVideos } from '../controllers/videoController.js';
 
 const router = express.Router();
 
-// GET /api/videos -> Gets all videos for the HomeScreen
+// GET /api/videos
 router.get('/', getAllVideos);
 
-// GET /api/videos/:videoId -> Gets details for one video
-router.get('/:videoId', getVideoById);
+// POST /api/videos/seed
+router.post('/seed', seedVideos);
 
-// GET /api/concepts/:videoId -> Gets concepts for one video
-router.get('/concepts/:videoId', getConceptsByVideoId);
+// GET /api/videos/:videoId
+router.get('/:videoId', getVideoById);
 
 export default router;
