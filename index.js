@@ -1,15 +1,29 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import connectDB from './config/db.js';
+import mongoose from 'mongoose'; // Import mongoose
 import videoRoutes from './routes/videoRoutes.js';
 import conceptRoutes from './routes/conceptRoutes.js';
 
 // Load environment variables
 dotenv.config();
 
-// Connect to the database
+
+// =================================================================
+//  DATABASE CONNECTION (Moved back into index.js)
+// =================================================================
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('✅ MongoDB connected successfully');
+  } catch (error) {
+    console.error(`❌ MongoDB connection error: ${error.message}`);
+    process.exit(1); // Exit process with failure
+  }
+};
+// Call the function to connect to the database
 connectDB();
+
 
 const app = express();
 
@@ -17,10 +31,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 // =================================================================
-//  HEALTH CHECK ROUTE (This is the new, important part)
+//  HEALTH CHECK ROUTE
 // =================================================================
-// This route will respond to Render's health checks.
+// This route responds to Render's health checks to prevent 502 errors.
 app.get('/', (req, res) => {
   res.send('API is running successfully.');
 });
@@ -29,10 +44,7 @@ app.get('/', (req, res) => {
 // =================================================================
 //  API ROUTES
 // =================================================================
-// All video-related routes will be under /api/videos
 app.use('/api/videos', videoRoutes);
-
-// All concept-related routes will be under /api/concepts
 app.use('/api/concepts', conceptRoutes);
 
 
@@ -42,10 +54,5 @@ app.use('/api/concepts', conceptRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
-  console.log('MongoDB connected successfully');
-  console.log('==> Your service is live 🚀 <==');
-  console.log('//////////////////////////////////////////////////');
-  console.log(`==> Available at your primary URL https://${process.env.RENDER_EXTERNAL_HOSTNAME}`);
-  console.log('//////////////////////////////////////////////////');
+  console.log(`🚀 Server is listening on port ${PORT}`);
 });
