@@ -1,33 +1,51 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import cors from 'cors';
+import connectDB from './config/db.js';
 import videoRoutes from './routes/videoRoutes.js';
 import conceptRoutes from './routes/conceptRoutes.js';
 
+// Load environment variables
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 8000;
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB connected successfully');
-  } catch (error) {
-    console.error(`❌ MongoDB connection error: ${error.message}`);
-    process.exit(1);
-  }
-};
-
+// Connect to the database
 connectDB();
+
+const app = express();
+
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-// Tell express to use the video routes
+// =================================================================
+//  HEALTH CHECK ROUTE (This is the new, important part)
+// =================================================================
+// This route will respond to Render's health checks.
+app.get('/', (req, res) => {
+  res.send('API is running successfully.');
+});
+
+
+// =================================================================
+//  API ROUTES
+// =================================================================
+// All video-related routes will be under /api/videos
 app.use('/api/videos', videoRoutes);
 
 // All concept-related routes will be under /api/concepts
 app.use('/api/concepts', conceptRoutes);
 
+
+// =================================================================
+//  SERVER STARTUP
+// =================================================================
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server is listening on port ${PORT}`);
+  console.log(`Server is listening on port ${PORT}`);
+  console.log('MongoDB connected successfully');
+  console.log('==> Your service is live 🚀 <==');
+  console.log('//////////////////////////////////////////////////');
+  console.log(`==> Available at your primary URL https://${process.env.RENDER_EXTERNAL_HOSTNAME}`);
+  console.log('//////////////////////////////////////////////////');
 });
