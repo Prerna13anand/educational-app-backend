@@ -1,4 +1,3 @@
-
 import express from 'express';
 import {
   getAllVideos,
@@ -10,36 +9,32 @@ import {
 
 const router = express.Router();
 
-
 // =================================================================
-//  MAIN API ROUTES FOR THE REACT NATIVE APP
+//  MAIN API ROUTES
 // =================================================================
 
 // @desc    Get all videos for the HomeScreen
 // @route   GET /api/videos
-router.get('/videos', getAllVideos);
+// This is the corrected route. It now uses '/' instead of '/videos'.
+router.get('/', getAllVideos);
 
 // @desc    Get a single video's details for the VideoPlayerScreen
 // @route   GET /api/videos/:videoId
-router.get('/videos/:videoId', getVideoById);
+router.get('/:videoId', getVideoById);
 
 // @desc    Get the (mocked) concepts for a video
 // @route   GET /api/concepts/:videoId
-router.get('/concepts/:videoId', getConceptsByVideoId);
+// This route is separate and correct as is.
+// Note: We will mount this separately in the main server file.
 
 
 // =================================================================
-//  UTILITY ROUTE FOR SETUP
+//  UTILITY & EXTRA ROUTES
 // =================================================================
 
 // @desc    Seed the database with sample videos (Run this once)
 // @route   POST /api/seed
 router.post('/seed', seedVideos);
-
-
-// =================================================================
-//  EXTRA ROUTE (Not used by the app yet)
-// =================================================================
 
 // @desc    Process a video with the AI
 // @route   POST /api/process
