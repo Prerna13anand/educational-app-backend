@@ -142,3 +142,46 @@ export const getAllVideos = async (req, res) => {
         res.status(500).send({ message: error.message });
     }
 };
+// Add this new function
+export const getVideoById = async (req, res) => {
+  try {
+    const video = await Video.findOne({ videoId: req.params.videoId });
+
+    if (video) {
+      res.json(video);
+    } else {
+      res.status(404).json({ message: 'Video not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// @desc    Get concepts for a specific video (MOCKED)
+// @route   GET /api/concepts/:videoId
+// @access  Public
+// @desc    Get concepts for a specific video (MOCKED)
+// @route   GET /api/concepts/:videoId
+// @access  Public
+export const getConceptsByVideoId = async (req, res) => { // <-- Add "export" here
+  try {
+    // This is MOCK data. Later, you will replace this with your real AI logic.
+    const mockConcepts = [
+      {
+        _id: 'concept1',
+        concept:
+          'An algebraic expression is the result of combining numbers and algebraic symbols by means of the four fundamental operations.',
+        reference: 'NCERT, Grade 7 Mathematics, Section 12.1, p. 236',
+      },
+      {
+        _id: 'concept2',
+        concept:
+          'A variable is a symbol which takes various numerical values.',
+        reference: 'NCERT, Grade 7 Mathematics, Section 12.2, p. 238',
+      },
+    ];
+
+    res.status(200).json(mockConcepts);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
