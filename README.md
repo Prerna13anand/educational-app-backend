@@ -37,6 +37,8 @@ To run this project on your local machine for development:
 ## Deployment (Render)
 
 The service is deployed on [Render](https://render.com/). The live service uses the same codebase but gets its environment variables from the Render dashboard.
+**Live URL:** [https://educational-app-backend-13s7.onrender.com](https://educational-app-backend-13s7.onrender.com)
+
 
 For a successful deployment on Render, ensure the following **Environment Variables** are set in the service's settings:
 -   `MONGO_URI`
