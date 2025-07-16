@@ -38,7 +38,20 @@ const sampleVideos = [
     thumbnail: 'https://i.ytimg.com/vi/G3GWA_iL-4k/hqdefault.jpg',
     channel: 'Google',
   },
+  {
+    videoId: 'aircAruvnKk',
+    title: 'The Man Who Accidentally Killed The Most People In History',
+    thumbnail: 'https://i.ytimg.com/vi/aircAruvnKk/hqdefault.jpg',
+    channel: 'Veritasium',
+  },
+  {
+    videoId: 'mPq6b_CCayI',
+    title: 'How to Take Over the World',
+    thumbnail: 'https://i.ytimg.com/vi/mPq6b_CCayI/hqdefault.jpg',
+    channel: 'Kurzgesagt',
+  }
 ];
+
 
 
 export const processVideo = async (req, res) => {
