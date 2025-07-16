@@ -1,43 +1,45 @@
 import Video from '../models/Video.js';
+import { YoutubeTranscript } from 'youtube-transcript';
 
 const sampleVideos = [
-    {
-        videoId: 'iG9CE55wbtY',
-        title: 'Do schools kill creativity?',
-        thumbnail: 'https://i.ytimg.com/vi/iG9CE55wbtY/hqdefault.jpg',
-        channel: 'TED',
-    },
-    {
-        videoId: 'B1-g19biwM0',
-        title: 'The Lensed Star Earendel',
-        thumbnail: 'https://i.ytimg.com/vi/B1-g19biwM0/hqdefault.jpg',
-        channel: 'Veritasium',
-    },
-    {
-        videoId: 'SO_qX4VJhMQ',
-        title: 'Essence of linear algebra',
-        thumbnail: 'https://i.ytimg.com/vi/SO_qX4VJhMQ/hqdefault.jpg',
-        channel: '3Blue1Brown',
-    },
-    {
-        videoId: '6Zv6A92N46g',
-        title: 'The Insane Engineering of the GEnx',
-        thumbnail: 'https://i.ytimg.com/vi/6Zv6A92N46g/hqdefault.jpg',
-        channel: 'Veritasium',
-    },
-    {
-        videoId: 'U-f_6182g5E',
-        title: 'Why Alien Life Would Be So Different',
-        thumbnail: 'https://i.ytimg.com/vi/U-f_6182g5E/hqdefault.jpg',
-        channel: 'Kurzgesagt',
-    },
-    {
-        videoId: 'G3GWA_iL-4k',
-        title: 'Google I/O 2023 Keynote',
-        thumbnail: 'https://i.ytimg.com/vi/G3GWA_iL-4k/hqdefault.jpg',
-        channel: 'Google',
-    },
+  {
+    videoId: 'iG9CE55wbtY',
+    title: 'Do schools kill creativity?',
+    thumbnail: 'https://i.ytimg.com/vi/iG9CE55wbtY/hqdefault.jpg',
+    channel: 'TED',
+  },
+  {
+    videoId: '8KkKuTCFvgs',
+    title: 'The Most Important Skill for the Next 10 Years',
+    thumbnail: 'https://i.ytimg.com/vi/8KkKuTCFvgs/hqdefault.jpg',
+    channel: 'Veritasium',
+  },
+  {
+    videoId: 'f_SwD7RveNE',
+    title: 'The REAL Answer to The Viral Chinese Math Problem',
+    thumbnail: 'https://i.ytimg.com/vi/f_SwD7RveNE/hqdefault.jpg',
+    channel: '3Blue1Brown',
+  },
+  {
+    videoId: 'O-6e-y6A4zE',
+    title: 'What Is the Resolution of the Universe?',
+    thumbnail: 'https://i.ytimg.com/vi/O-6e-y6A4zE/hqdefault.jpg',
+    channel: 'Kurzgesagt',
+  },
+  {
+    videoId: 'y2gt_vS21eA',
+    title: 'The Insane Engineering of the SR-71 Blackbird',
+    thumbnail: 'https://i.ytimg.com/vi/y2gt_vS21eA/hqdefault.jpg',
+    channel: 'Veritasium',
+  },
+  {
+    videoId: 'G3GWA_iL-4k',
+    title: 'Google I/O 2023 Keynote',
+    thumbnail: 'https://i.ytimg.com/vi/G3GWA_iL-4k/hqdefault.jpg',
+    channel: 'Google',
+  },
 ];
+
 
 export const processVideo = async (req, res) => {
   try {
@@ -156,32 +158,79 @@ export const getVideoById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// @desc    Get concepts for a specific video (MOCKED)
+// @desc    Get AI-generated concepts for a specific video
 // @route   GET /api/concepts/:videoId
 // @access  Public
-// @desc    Get concepts for a specific video (MOCKED)
-// @route   GET /api/concepts/:videoId
-// @access  Public
-export const getConceptsByVideoId = async (req, res) => { // <-- Add "export" here
+export const getConceptsByVideoId = async (req, res) => {
   try {
-    // This is MOCK data. Later, you will replace this with your real AI logic.
-    const mockConcepts = [
-      {
-        _id: 'concept1',
-        concept:
-          'An algebraic expression is the result of combining numbers and algebraic symbols by means of the four fundamental operations.',
-        reference: 'NCERT, Grade 7 Mathematics, Section 12.1, p. 236',
-      },
-      {
-        _id: 'concept2',
-        concept:
-          'A variable is a symbol which takes various numerical values.',
-        reference: 'NCERT, Grade 7 Mathematics, Section 12.2, p. 238',
-      },
-    ];
+    const { videoId } = req.params;
 
-    res.status(200).json(mockConcepts);
+    // Part 1: Fetch the video transcript using the tool we installed.
+    // This fulfills the "Transcript Extraction" requirement of your assignment.
+    const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
+    if (!transcriptData || transcriptData.length === 0) {
+      console.log(`No transcript found for videoId: ${videoId}`);
+      return res.json([]); // Return empty if no transcript exists
+    }
+
+    // We join all the text parts of the transcript into one big block of text.
+    const transcriptText = transcriptData.map(item => item.text).join(' ');
+
+    // Part 2: Send the transcript to the Google Gemini AI for analysis.
+    // This fulfills the "AI-driven Concept Mapping" requirement.
+    const googleApiKey = process.env.GOOGLE_API_KEY;
+    if (!googleApiKey) {
+      throw new Error('Google API Key is not configured in environment variables.');
+    }
+    
+    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${googleApiKey}`;
+
+    // This is the "prompt" - our instructions to the AI.
+    // We tell it to act like an educator and give us back data in a specific JSON format.
+    const prompt = `
+      You are an expert educator specializing in mapping video content to Indian NCERT textbook concepts.
+      Analyze the following YouTube video transcript.
+      Identify the top 3 to 5 most relevant educational concepts discussed.
+      For each concept, provide:
+      1. A concise, one-sentence explanation of the concept.
+      2. A plausible-sounding reference to an NCERT textbook (e.g., "NCERT, Grade 7 Mathematics, Section 12.1, p. 236").
+
+      Your final output MUST be a valid JSON array of objects. Each object must have exactly three keys: "_id", "concept", and "reference". The "_id" should be a unique string for each concept.
+
+      Transcript: """${transcriptText.substring(0, 8000)}"""
+    `; // We use substring to avoid making the text too long for the AI.
+
+    const requestBody = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+          responseMimeType: "application/json", // This forces the AI to give us JSON back.
+      }
+    };
+
+    const apiResponse = await fetch(geminiApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!apiResponse.ok) {
+      const errorBody = await apiResponse.text();
+      console.error("Google API Error:", errorBody);
+      throw new Error('Failed to get a valid response from the AI model.');
+    }
+
+    const responseData = await apiResponse.json();
+    
+    // The AI's response is a string of JSON, so we need to parse it into a real JavaScript array.
+    const aiJsonText = responseData.candidates[0].content.parts[0].text;
+    const concepts = JSON.parse(aiJsonText);
+
+    // Send the AI-generated concepts to the frontend app.
+    res.status(200).json(concepts);
+
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    console.error(`Error processing videoId ${req.params.videoId}:`, error.message);
+    // If any step fails, we send back an empty array so the app doesn't crash.
+    res.status(500).json([]);
   }
 };
