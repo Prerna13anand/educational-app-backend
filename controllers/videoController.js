@@ -9,34 +9,28 @@ const sampleVideos = [
     channel: 'TED',
   },
   {
-    videoId: '8KkKuTCFvgs',
-    title: 'The Most Important Skill for the Next 10 Years',
-    thumbnail: 'https://i.ytimg.com/vi/8KkKuTCFvgs/hqdefault.jpg',
-    channel: 'Veritasium',
-  },
-  {
     videoId: 'f_SwD7RveNE',
     title: 'The REAL Answer to The Viral Chinese Math Problem',
     thumbnail: 'https://i.ytimg.com/vi/f_SwD7RveNE/hqdefault.jpg',
     channel: '3Blue1Brown',
   },
   {
-    videoId: 'O-6e-y6A4zE',
-    title: 'What Is the Resolution of the Universe?',
-    thumbnail: 'https://i.ytimg.com/vi/O-6e-y6A4zE/hqdefault.jpg',
-    channel: 'Kurzgesagt',
-  },
-  {
-    videoId: 'y2gt_vS21eA',
-    title: 'The Insane Engineering of the SR-71 Blackbird',
-    thumbnail: 'https://i.ytimg.com/vi/y2gt_vS21eA/hqdefault.jpg',
+    videoId: 'sXpbONjV1Jc',
+    title: 'The Science of Thinking',
+    thumbnail: 'https://i.ytimg.com/vi/sXpbONjV1Jc/hqdefault.jpg',
     channel: 'Veritasium',
   },
   {
-    videoId: 'G3GWA_iL-4k',
-    title: 'Google I/O 2023 Keynote',
-    thumbnail: 'https://i.ytimg.com/vi/G3GWA_iL-4k/hqdefault.jpg',
-    channel: 'Google',
+    videoId: 'sCbbMZ-q4-I',
+    title: 'Why do we use Roman numerals?',
+    thumbnail: 'https://i.ytimg.com/vi/sCbbMZ-q4-I/hqdefault.jpg',
+    channel: 'Numberphile',
+  },
+  {
+    videoId: 'eIho2S0ZahI',
+    title: 'How to speak so that people want to listen',
+    thumbnail: 'https://i.ytimg.com/vi/eIho2S0ZahI/hqdefault.jpg',
+    channel: 'TED',
   }
 ];
 
