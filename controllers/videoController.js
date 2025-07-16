@@ -9,46 +9,16 @@ const sampleVideos = [
     channel: 'TED',
   },
   {
-    videoId: '8KkKuTCFvgs',
-    title: 'The Most Important Skill for the Next 10 Years',
-    thumbnail: 'https://i.ytimg.com/vi/8KkKuTCFvgs/hqdefault.jpg',
-    channel: 'Veritasium',
-  },
-  {
     videoId: 'f_SwD7RveNE',
     title: 'The REAL Answer to The Viral Chinese Math Problem',
     thumbnail: 'https://i.ytimg.com/vi/f_SwD7RveNE/hqdefault.jpg',
     channel: '3Blue1Brown',
   },
   {
-    videoId: 'O-6e-y6A4zE',
-    title: 'What Is the Resolution of the Universe?',
-    thumbnail: 'https://i.ytimg.com/vi/O-6e-y6A4zE/hqdefault.jpg',
-    channel: 'Kurzgesagt',
-  },
-  {
-    videoId: 'y2gt_vS21eA',
-    title: 'The Insane Engineering of the SR-71 Blackbird',
-    thumbnail: 'https://i.ytimg.com/vi/y2gt_vS21eA/hqdefault.jpg',
-    channel: 'Veritasium',
-  },
-  {
-    videoId: 'G3GWA_iL-4k',
-    title: 'Google I/O 2023 Keynote',
-    thumbnail: 'https://i.ytimg.com/vi/G3GWA_iL-4k/hqdefault.jpg',
-    channel: 'Google',
-  },
-  {
     videoId: 'aircAruvnKk',
     title: 'The Man Who Accidentally Killed The Most People In History',
     thumbnail: 'https://i.ytimg.com/vi/aircAruvnKk/hqdefault.jpg',
     channel: 'Veritasium',
-  },
-  {
-    videoId: 'mPq6b_CCayI',
-    title: 'How to Take Over the World',
-    thumbnail: 'https://i.ytimg.com/vi/mPq6b_CCayI/hqdefault.jpg',
-    channel: 'Kurzgesagt',
   }
 ];
 
@@ -177,53 +147,46 @@ export const getVideoById = async (req, res) => {
 // @route   GET /api/concepts/:videoId
 // @access  Public
 export const getConceptsByVideoId = async (req, res) => {
-  try {
-    const { videoId } = req.params;
-    let transcriptText = '';
+  const { videoId } = req.params;
+  console.log(`[DEBUG] Starting concept generation for videoId: ${videoId}`);
 
-    // Part 1: Fetch the video transcript inside a try...catch block
-    // This is the NEW, important part. It prevents the server from crashing.
+  try {
+    // 1. Fetch the video transcript
+    let transcriptText = '';
     try {
       const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
       if (transcriptData && transcriptData.length > 0) {
         transcriptText = transcriptData.map(item => item.text).join(' ');
+        console.log(`[DEBUG] Transcript fetched successfully. Length: ${transcriptText.length}`);
       }
     } catch (transcriptError) {
-      console.log(`Could not fetch transcript for videoId: ${videoId}. It may be disabled. Error: ${transcriptError.message}`);
-      // If transcript fails, we will proceed with an empty string.
+      console.error(`[DEBUG] Could not fetch transcript for videoId: ${videoId}. Error: ${transcriptError.message}`);
+      return res.json([]); // Return empty if transcript fails
     }
-    
-    // If there's no transcript, we can't ask the AI, so we return an empty array.
+
     if (!transcriptText) {
+      console.log('[DEBUG] Transcript is empty. Cannot proceed with AI generation.');
       return res.json([]);
     }
 
-    // Part 2: Send the transcript to the Google Gemini AI for analysis.
+    // 2. Send the transcript to the Google Gemini AI
     const googleApiKey = process.env.GOOGLE_API_KEY;
     if (!googleApiKey) {
-      throw new Error('Google API Key is not configured in environment variables.');
+      throw new Error('Google API Key is not configured.');
     }
     
     const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${googleApiKey}`;
-
     const prompt = `
-      You are an expert educator specializing in mapping video content to Indian NCERT textbook concepts.
-      Analyze the following YouTube video transcript.
-      Identify the top 3 to 5 most relevant educational concepts discussed.
-      For each concept, provide:
-      1. A concise, one-sentence explanation of the concept.
-      2. A plausible-sounding reference to an NCERT textbook (e.g., "NCERT, Grade 7 Mathematics, Section 12.1, p. 236").
-
-      Your final output MUST be a valid JSON array of objects. Each object must have exactly three keys: "_id", "concept", and "reference". The "_id" should be a unique string for each concept.
-
+      You are an expert educator. Analyze the following transcript and identify the top 3-5 key educational concepts.
+      Your final output MUST be a valid JSON array of objects. Each object must have three keys: "_id", "concept", and "reference".
       Transcript: """${transcriptText.substring(0, 8000)}"""
     `;
 
+    console.log('[DEBUG] Sending prompt to Google AI...');
+    
     const requestBody = {
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-          responseMimeType: "application/json",
-      }
+      generationConfig: { responseMimeType: "application/json" }
     };
 
     const apiResponse = await fetch(geminiApiUrl, {
@@ -234,18 +197,22 @@ export const getConceptsByVideoId = async (req, res) => {
 
     if (!apiResponse.ok) {
       const errorBody = await apiResponse.text();
-      console.error("Google API Error:", errorBody);
+      console.error("[DEBUG] Google API Error:", errorBody);
       throw new Error('Failed to get a valid response from the AI model.');
     }
 
     const responseData = await apiResponse.json();
     const aiJsonText = responseData.candidates[0].content.parts[0].text;
-    const concepts = JSON.parse(aiJsonText);
+    
+    console.log('[DEBUG] Received response from AI. Raw text:', aiJsonText);
 
+    // 3. Parse and send the response
+    const concepts = JSON.parse(aiJsonText);
+    console.log('[DEBUG] Successfully parsed AI response into JSON.');
     res.status(200).json(concepts);
 
   } catch (error) {
-    console.error(`Error processing videoId ${req.params.videoId}:`, error.message);
+    console.error(`[DEBUG] CRITICAL ERROR in getConceptsByVideoId for ${videoId}:`, error.message);
     res.status(500).json([]);
   }
 };
