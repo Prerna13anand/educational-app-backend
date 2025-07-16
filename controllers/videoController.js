@@ -9,18 +9,37 @@ const sampleVideos = [
     channel: 'TED',
   },
   {
+    videoId: '8KkKuTCFvgs',
+    title: 'The Most Important Skill for the Next 10 Years',
+    thumbnail: 'https://i.ytimg.com/vi/8KkKuTCFvgs/hqdefault.jpg',
+    channel: 'Veritasium',
+  },
+  {
     videoId: 'f_SwD7RveNE',
     title: 'The REAL Answer to The Viral Chinese Math Problem',
     thumbnail: 'https://i.ytimg.com/vi/f_SwD7RveNE/hqdefault.jpg',
     channel: '3Blue1Brown',
   },
   {
-    videoId: 'aircAruvnKk',
-    title: 'The Man Who Accidentally Killed The Most People In History',
-    thumbnail: 'https://i.ytimg.com/vi/aircAruvnKk/hqdefault.jpg',
+    videoId: 'O-6e-y6A4zE',
+    title: 'What Is the Resolution of the Universe?',
+    thumbnail: 'https://i.ytimg.com/vi/O-6e-y6A4zE/hqdefault.jpg',
+    channel: 'Kurzgesagt',
+  },
+  {
+    videoId: 'y2gt_vS21eA',
+    title: 'The Insane Engineering of the SR-71 Blackbird',
+    thumbnail: 'https://i.ytimg.com/vi/y2gt_vS21eA/hqdefault.jpg',
     channel: 'Veritasium',
+  },
+  {
+    videoId: 'G3GWA_iL-4k',
+    title: 'Google I/O 2023 Keynote',
+    thumbnail: 'https://i.ytimg.com/vi/G3GWA_iL-4k/hqdefault.jpg',
+    channel: 'Google',
   }
 ];
+
 
 
 
