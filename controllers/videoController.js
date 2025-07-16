@@ -20,12 +20,7 @@ const sampleVideos = [
     thumbnail: 'https://i.ytimg.com/vi/sXpbONjV1Jc/hqdefault.jpg',
     channel: 'Veritasium',
   },
-  {
-    videoId: 'sCbbMZ-q4-I',
-    title: 'Why do we use Roman numerals?',
-    thumbnail: 'https://i.ytimg.com/vi/sCbbMZ-q4-I/hqdefault.jpg',
-    channel: 'Numberphile',
-  },
+ 
   {
     videoId: 'eIho2S0ZahI',
     title: 'How to speak so that people want to listen',
