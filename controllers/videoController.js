@@ -158,26 +158,34 @@ export const getVideoById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 // @desc    Get AI-generated concepts for a specific video
 // @route   GET /api/concepts/:videoId
 // @access  Public
 export const getConceptsByVideoId = async (req, res) => {
   try {
     const { videoId } = req.params;
+    let transcriptText = '';
 
-    // Part 1: Fetch the video transcript using the tool we installed.
-    // This fulfills the "Transcript Extraction" requirement of your assignment.
-    const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
-    if (!transcriptData || transcriptData.length === 0) {
-      console.log(`No transcript found for videoId: ${videoId}`);
-      return res.json([]); // Return empty if no transcript exists
+    // Part 1: Fetch the video transcript inside a try...catch block
+    // This is the NEW, important part. It prevents the server from crashing.
+    try {
+      const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
+      if (transcriptData && transcriptData.length > 0) {
+        transcriptText = transcriptData.map(item => item.text).join(' ');
+      }
+    } catch (transcriptError) {
+      console.log(`Could not fetch transcript for videoId: ${videoId}. It may be disabled. Error: ${transcriptError.message}`);
+      // If transcript fails, we will proceed with an empty string.
+    }
+    
+    // If there's no transcript, we can't ask the AI, so we return an empty array.
+    if (!transcriptText) {
+      return res.json([]);
     }
 
-    // We join all the text parts of the transcript into one big block of text.
-    const transcriptText = transcriptData.map(item => item.text).join(' ');
-
     // Part 2: Send the transcript to the Google Gemini AI for analysis.
-    // This fulfills the "AI-driven Concept Mapping" requirement.
     const googleApiKey = process.env.GOOGLE_API_KEY;
     if (!googleApiKey) {
       throw new Error('Google API Key is not configured in environment variables.');
@@ -185,8 +193,6 @@ export const getConceptsByVideoId = async (req, res) => {
     
     const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${googleApiKey}`;
 
-    // This is the "prompt" - our instructions to the AI.
-    // We tell it to act like an educator and give us back data in a specific JSON format.
     const prompt = `
       You are an expert educator specializing in mapping video content to Indian NCERT textbook concepts.
       Analyze the following YouTube video transcript.
@@ -198,12 +204,12 @@ export const getConceptsByVideoId = async (req, res) => {
       Your final output MUST be a valid JSON array of objects. Each object must have exactly three keys: "_id", "concept", and "reference". The "_id" should be a unique string for each concept.
 
       Transcript: """${transcriptText.substring(0, 8000)}"""
-    `; // We use substring to avoid making the text too long for the AI.
+    `;
 
     const requestBody = {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
-          responseMimeType: "application/json", // This forces the AI to give us JSON back.
+          responseMimeType: "application/json",
       }
     };
 
@@ -220,17 +226,13 @@ export const getConceptsByVideoId = async (req, res) => {
     }
 
     const responseData = await apiResponse.json();
-    
-    // The AI's response is a string of JSON, so we need to parse it into a real JavaScript array.
     const aiJsonText = responseData.candidates[0].content.parts[0].text;
     const concepts = JSON.parse(aiJsonText);
 
-    // Send the AI-generated concepts to the frontend app.
     res.status(200).json(concepts);
 
   } catch (error) {
     console.error(`Error processing videoId ${req.params.videoId}:`, error.message);
-    // If any step fails, we send back an empty array so the app doesn't crash.
     res.status(500).json([]);
   }
 };
